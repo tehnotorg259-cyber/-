@@ -1,0 +1,185 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Тестування ТОП асортименту</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: аналітична довідка. Зверху висновки і два графіки, далі групи, теплова карта по менеджерах, міста, примітки. */
+:root{
+  --bg:#f4f6f5; --surface:#ffffff; --ink:#18231f; --muted:#5b6a64; --line:#d9e0dc;
+  --pass:#0e6b5c; --pass-ink:#ffffff; --mid:#f1e3c4; --mid-ink:#4a3a12; --low:#e9b8a4; --low-ink:#5a2411;
+  --none:#eceeed; --up:#0e6b5c; --down:#b3411f; --accent:#0e6b5c;
+  --font:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121916; --surface:#1a2420; --ink:#e6ede9; --muted:#9aaba3; --line:#2c3a34;
+  --pass:#2f9d88; --pass-ink:#07130f; --mid:#4a4023; --mid-ink:#f0e3bd; --low:#6a3322; --low-ink:#f6d5c7;
+  --none:#222d28; --up:#4cc2aa; --down:#f08a67; --accent:#4cc2aa; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121916; --surface:#1a2420; --ink:#e6ede9; --muted:#9aaba3; --line:#2c3a34;
+  --pass:#2f9d88; --pass-ink:#07130f; --mid:#4a4023; --mid-ink:#f0e3bd; --low:#6a3322; --low-ink:#f6d5c7;
+  --none:#222d28; --up:#4cc2aa; --down:#f08a67; --accent:#4cc2aa; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:flex;flex-direction:column;gap:36px}
+h1{font-size:clamp(24px,4vw,34px);line-height:1.15;margin:0;font-weight:600;text-wrap:balance}
+h2{font-size:19px;margin:0 0 4px;font-weight:600;text-wrap:balance}
+p{margin:0}
+.sub{color:var(--muted);margin-top:8px;max-width:70ch}
+.lead{color:var(--muted);max-width:70ch}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+.finds{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.find{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.find b{font-family:var(--mono);font-size:26px;font-weight:500;color:var(--accent);line-height:1.1}
+.find span{color:var(--muted);font-size:14px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 14px 8px;min-width:0}
+.chart h3{font-size:15px;margin:0 0 6px;font-weight:600}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--mono);font-size:11px}
+.chart .val{fill:var(--ink);font-size:12px}
+.grid{stroke:var(--line);stroke-width:1}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase;position:sticky;top:0;background:var(--surface)}
+tr:last-child td{border-bottom:0}
+td.c,th.c{text-align:center}
+.cell{display:inline-block;min-width:44px;padding:3px 6px;border-radius:3px;font-family:var(--mono);font-size:13px;text-align:center}
+.p{background:var(--pass);color:var(--pass-ink)} .m{background:var(--mid);color:var(--mid-ink)} .l{background:var(--low);color:var(--low-ink)}
+.z{background:var(--none);color:var(--muted)}
+.grp td{background:var(--bg);font-weight:600;padding-block:10px;font-size:13px}
+.grp small{font-weight:400;color:var(--muted);margin-left:8px}
+.up{color:var(--up)} .down{color:var(--down)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:5px 11px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=search]{font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);min-width:200px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);align-items:center}
+.legend .cell{min-width:0}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.g{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.g b{font-size:15px}.g .n{font-family:var(--mono);font-size:22px;color:var(--accent)}
+.g span{color:var(--muted);font-size:13px}
+.notes{display:flex;flex-direction:column;gap:8px;color:var(--muted);max-width:75ch;font-size:14px}
+.notes b{color:var(--ink);font-weight:500}
+</style>
+<div class="wrap">
+<header>
+  <h1>Квартальне тестування з ТОП асортименту</h1>
+  <p class="sub">Шість замірів, 04.08.2025 – 05.10.2026. У звіті 74 менеджери зі списку на 05.10.26, звільнених немає. Тест складено, якщо результат від 92 балів.</p>
+</header>
+
+<section>
+  <h2>Головне</h2>
+  <div class="finds">
+    <div class="find"><b>33% → 69%</b><span>частка складених тестів серед менеджерів, які проходили заміри: серпень 2025 і жовтень 2026</span></div>
+    <div class="find"><b>19%</b><span>мінімум у лютому 2026 (12 з 64). У травні різкий стрибок до 60%, відтоді зростання щоквартально</span></div>
+    <div class="find"><b>27 з 74</b><span>склали три останні тести поспіль. Ще 9 складали у липні, а в жовтні опустилися нижче 92</span></div>
+    <div class="find"><b>7</b><span>менеджерів із двома і більше замірами жодного разу не набрали 92: Рева, Кучерак, Алексєєв, Чуприна, Волос, Попов, Фетько</span></div>
+  </div>
+  <p class="lead">Липень → жовтень, 67 менеджерів із обома результатами: 24 покращили бал, 23 погіршили, 20 без змін. 13 стали складати, 9 перестали. Середній бал майже не змінився (88,6 → 88,2), частка складених зросла (65% → 69%). Хильченко О. С. у жовтні тест не розпочав, тому в жовтневих підрахунках його немає (73 учасники).</p>
+</section>
+
+<section>
+  <h2>Динаміка по замірах</h2>
+  <div class="charts">
+    <div class="chart"><h3>Частка менеджерів, що склали (≥92), %</h3><svg id="c1" viewBox="0 0 440 240" role="img" aria-label="Частка складених тестів по замірах"></svg></div>
+    <div class="chart"><h3>Середній бал</h3><svg id="c2" viewBox="0 0 440 240" role="img" aria-label="Середній бал по замірах"></svg></div>
+  </div>
+  <div class="tbl"><table id="pt"></table></div>
+</section>
+
+<section>
+  <h2>Групи менеджерів</h2>
+  <p class="lead">Групи визначені за жовтневим результатом і двома-трьома попередніми.</p>
+  <div class="groups" id="groups"></div>
+</section>
+
+<section>
+  <h2>Динаміка кожного менеджера</h2>
+  <div class="tools" id="filters"></div>
+  <div class="tools"><input type="search" id="q" placeholder="Пошук за прізвищем або містом" aria-label="Пошук"></div>
+  <div class="legend"><span><span class="cell p">92+</span> склав</span><span><span class="cell m">75–91</span> майже</span><span><span class="cell l">до 74</span> далеко від порогу</span><span><span class="cell z">—</span> немає результату</span><span><span class="cell z">зар.</span> зараховано без балів</span></div>
+  <div class="tbl"><table id="mt"></table></div>
+</section>
+
+<section>
+  <h2>Міста, жовтень 2026</h2>
+  <div class="tbl"><table id="ct"></table></div>
+</section>
+
+<section>
+  <h2>Як рахувалося</h2>
+  <div class="notes">
+    <p><b>Склад.</b> Беруться лише ті, хто є в таблиці за 05.10.26. Тих, хто був у старих таблицях, але зараз відсутній, у розрахунок не включено. Прізвища зіставлялися за повним ПІБ, зайві пробіли прибрано.</p>
+    <p><b>Поріг.</b> 92 бали для всіх шести замірів, включно зі старими, де поріг був нижчим. Таблиця за 03.11.25 не мала колонки статусу, тому там усе рахується за балами.</p>
+    <p><b>Порівнянність шкал.</b> У серпні й листопаді 2025 бали мають інший вигляд (90, 88, 87 тощо), схоже, що кількість питань була іншою. Тому в цих замірах 90 уже не вважається складеним.</p>
+    <p><b>Без балів.</b> Порожні клітинки, «Не розпочато» і «НЕ РОЗПОЧАТО» показано як «—» і не враховано ні в частці, ні в середньому. У Сєрова В. С. лютий 2026 («Погоджено») і травень 2026 («за розпорядженням») зараховані без балів, у підрахунках не беруть участі.</p>
+    <p><b>Знаменник.</b> Частка складених рахується від тих, хто мав бал у цьому замірі (60, 62, 64, 67, 68, 73 людини). Склад росте, бо в команду приходили нові менеджери.</p>
+  </div>
+</section>
+</div>
+
+<script>
+const P=['04.08.25','03.11.25','02.02.26','04.05.26','06.07.26','05.10.26'];
+const M=[{"n":"Харкавий Юрій Петрович","c":"Вінниця","s":[100,83,100,92,100,92],"f":["","","","","",""],"g":"stable","k":5,"t":6,"d":-8},{"n":"Залізко Сергій Олександрович","c":"Вінниця","s":[100,100,83,100,92,92],"f":["","","","","",""],"g":"stable","k":5,"t":6,"d":0},{"n":"Кашпрук Олександр Миколайович","c":"Вінниця","s":[100,100,100,100,83,100],"f":["","","","","",""],"g":"unstable","k":5,"t":6,"d":17},{"n":"Моль Юрій Юрійович","c":"Вінниця","s":[100,100,83,100,100,100],"f":["","","","","",""],"g":"stable","k":5,"t":6,"d":0},{"n":"Щербанюк Володимир Васильович","c":"Вінниця","s":[90,83,42,92,100,92],"f":["","","","","",""],"g":"stable","k":3,"t":6,"d":-8},{"n":"Атаманчук Олександр Васильович","c":"Вінниця","s":[null,86,83,92,92,92],"f":["","","","","",""],"g":"stable","k":3,"t":5,"d":0},{"n":"Падалка Роман Сергійович","c":"Дніпро","s":[80,83,58,92,75,100],"f":["","","","","",""],"g":"unstable","k":2,"t":6,"d":25},{"n":"Балатюк Станіслав Миколайович","c":"Дніпро","s":[80,83,75,50,92,75],"f":["","","","","",""],"g":"lost","k":1,"t":6,"d":-17},{"n":"Параскева Олександр Олександрович","c":"Запоріжжя","s":[80,61,75,83,67,92],"f":["","","","","",""],"g":"unstable","k":1,"t":6,"d":25},{"n":"Петяк Микола Миколайович","c":"Дніпро","s":[90,83,75,92,100,100],"f":["","","","","",""],"g":"stable","k":3,"t":6,"d":0},{"n":"Попов Віталій","c":"Дніпро","s":[null,null,null,50,67,75],"f":["","","","","",""],"g":"below","k":0,"t":3,"d":8},{"n":"Волос Святослав Васильович","c":"Львів","s":[null,null,75,67,75,75],"f":["","","","","",""],"g":"below","k":0,"t":4,"d":0},{"n":"Чуприна Володимир Миколайович","c":"Мукачево","s":[70,67,75,67,83,83],"f":["","","","","",""],"g":"below","k":0,"t":6,"d":0},{"n":"Сіка Дмитро Михайлович","c":"Львів","s":[100,100,75,92,100,92],"f":["","","","","",""],"g":"stable","k":5,"t":6,"d":-8},{"n":"Гоцкалюк Сергій Олександрович","c":"Львів","s":[100,50,75,75,83,67],"f":["","","","","",""],"g":"below","k":1,"t":6,"d":-16},{"n":"Пархоменко Костянтин Вікторович","c":"Полтава","s":[80,92,92,83,58,67],"f":["","","","","",""],"g":"below","k":2,"t":6,"d":9},{"n":"Покладенко Юрій Олексійович","c":"Полтава","s":[90,61,67,100,92,92],"f":["","","","","",""],"g":"stable","k":3,"t":6,"d":0},{"n":"Олійник Сергій Миколайович","c":"Полтава","s":[60,83,80,92,83,67],"f":["","","","","",""],"g":"below","k":1,"t":6,"d":-16},{"n":"Королевят Михайло Вікторович","c":"Полтава","s":[90,81,80,83,83,92],"f":["","","","","",""],"g":"unstable","k":1,"t":6,"d":9},{"n":"Соколов Арсеній","c":"Полтава","s":[null,null,null,null,null,58],"f":["","","","","",""],"g":"new","k":0,"t":1,"d":null},{"n":"Кермас Андрій Андрійович","c":"Полтава","s":[null,null,null,null,null,83],"f":["","","","","",""],"g":"new","k":0,"t":1,"d":null},{"n":"Ковальківський Максим","c":"Чернігів","s":[null,null,null,100,92,92],"f":["","","","","",""],"g":"stable","k":3,"t":3,"d":0},{"n":"Топчій Ігор Віталійович","c":"Чернігів","s":[80,92,83,92,92,100],"f":["","","","","",""],"g":"stable","k":4,"t":6,"d":8},{"n":"Гричило Василь Богданович","c":"Тернопіль","s":[100,92,75,100,83,92],"f":["","","","","",""],"g":"unstable","k":4,"t":6,"d":9},{"n":"Мищишин Олег Григорович","c":"Тернопіль","s":[90,87,56,100,92,100],"f":["","","","","",""],"g":"stable","k":3,"t":6,"d":8},{"n":"Деркач Ярослав Петрович","c":"Тернопіль","s":[90,80,75,67,67,100],"f":["","","","","",""],"g":"unstable","k":1,"t":6,"d":33},{"n":"Хара Володимир","c":"Київ","s":[null,null,null,null,null,100],"f":["","","","","",""],"g":"new","k":1,"t":1,"d":null},{"n":"Милка Олександр Ігорович","c":"Київ","s":[90,78,100,92,100,92],"f":["","","","","",""],"g":"stable","k":4,"t":6,"d":-8},{"n":"Шлапак Володимир Ігорович","c":"Київ","s":[100,88,83,100,100,100],"f":["","","","","",""],"g":"stable","k":4,"t":6,"d":0},{"n":"Булига Олег Андрійович","c":"Київ","s":[100,90,65,50,100,67],"f":["","","","","",""],"g":"lost","k":2,"t":6,"d":-33},{"n":"Слизько Сергій Васильович","c":"Київ","s":[null,null,83,92,100,100],"f":["","","","","",""],"g":"stable","k":3,"t":4,"d":0},{"n":"Захарчук Веніамін Вікторович","c":"Луцьк","s":[60,100,50,100,83,92],"f":["","","","","",""],"g":"unstable","k":3,"t":6,"d":9},{"n":"Старушкевич Андрій Вікторович","c":"Луцьк","s":[90,97,83,92,100,92],"f":["","","","","",""],"g":"stable","k":4,"t":6,"d":-8},{"n":"Корнага Олександр Васильович","c":"Луцьк","s":[90,92,67,83,100,92],"f":["","","","","",""],"g":"unstable","k":3,"t":6,"d":-8},{"n":"Петров Олександр Петрович","c":"Черкаси","s":[100,52,75,100,100,100],"f":["","","","","",""],"g":"stable","k":4,"t":6,"d":0},{"n":"Андрієв Андрій Володимирович","c":"Черкаси","s":[100,58,100,75,100,83],"f":["","","","","",""],"g":"lost","k":3,"t":6,"d":-17},{"n":"Гуріч Тарас Сергійович","c":"Умань","s":[90,83,92,75,92,100],"f":["","","","","",""],"g":"unstable","k":3,"t":6,"d":8},{"n":"Василенко Віктор Анатолійович","c":"Умань","s":[90,83,55,92,83,100],"f":["","","","","",""],"g":"unstable","k":2,"t":6,"d":17},{"n":"Шумило Сергій Володимирович","c":"Умань","s":[100,92,75,92,100,100],"f":["","","","","",""],"g":"stable","k":5,"t":6,"d":0},{"n":"Савіцький Олександр Олександрович","c":"Рівне","s":[null,null,null,null,null,100],"f":["","","","","",""],"g":"new","k":1,"t":1,"d":null},{"n":"Савіцький Владислав Олександрович","c":"Рівне","s":[null,null,58,100,92,92],"f":["","","","","",""],"g":"stable","k":3,"t":4,"d":0},{"n":"Чумак Ігор Олександрович","c":"Житомир","s":[100,83,83,83,92,83],"f":["","","","","",""],"g":"lost","k":2,"t":6,"d":-9},{"n":"Чумак Андрій Олександрович","c":"Житомир","s":[70,87,92,100,92,100],"f":["","","","","",""],"g":"stable","k":4,"t":6,"d":8},{"n":"Романов Дмитро Олександрович","c":"Житомир","s":[null,71,92,83,100,92],"f":["","","","","",""],"g":"unstable","k":3,"t":5,"d":-8},{"n":"Хильченко Олександр Сергійович","c":"Кропивницький","s":[90,75,56,92,92,null],"f":["","","","","","n"],"g":"nostart","k":2,"t":5,"d":null},{"n":"Бойко Сергій Олександрович","c":"Кропивницький","s":[80,100,83,100,83,92],"f":["","","","","",""],"g":"unstable","k":3,"t":6,"d":9},{"n":"Лисогор Михайло Олександрович","c":"Кропивницький","s":[100,93,83,100,100,75],"f":["","","","","",""],"g":"lost","k":4,"t":6,"d":-25},{"n":"Шевченко Ростислав Миколайович","c":"Кропивницький","s":[90,83,83,100,100,83],"f":["","","","","",""],"g":"lost","k":2,"t":6,"d":-17},{"n":"Фуженко Олег Анатолійович","c":"Кропивницький","s":[100,92,83,100,100,75],"f":["","","","","",""],"g":"lost","k":4,"t":6,"d":-25},{"n":"Куніцький Олександр","c":"Миколаїв","s":[null,null,null,null,null,67],"f":["","","","","",""],"g":"new","k":0,"t":1,"d":null},{"n":"Похилько Сергій Григорович","c":"Миколаїв","s":[60,88,60,100,83,83],"f":["","","","","",""],"g":"below","k":1,"t":6,"d":0},{"n":"Жеріт Геннадій Миколайович","c":"Миколаїв","s":[90,61,86,92,92,100],"f":["","","","","",""],"g":"stable","k":3,"t":6,"d":8},{"n":"Мойсеюк Олександр","c":"Миколаїв","s":[null,null,null,null,null,92],"f":["","","","","",""],"g":"new","k":1,"t":1,"d":null},{"n":"Фетько Євгеній Володимирович","c":"Миколаїв","s":[null,null,null,42,67,50],"f":["","","","","",""],"g":"below","k":0,"t":3,"d":-17},{"n":"Тельбас Максим Валентинович","c":"Одеса","s":[100,33,72,100,92,100],"f":["","","","","",""],"g":"stable","k":4,"t":6,"d":8},{"n":"Тарасов Олександр Геннадійович","c":"Одеса","s":[100,100,100,100,100,92],"f":["","","","","",""],"g":"stable","k":6,"t":6,"d":-8},{"n":"Васильковський Максим Володимирович","c":"Одеса","s":[100,92,69,100,92,92],"f":["","","","","",""],"g":"stable","k":5,"t":6,"d":0},{"n":"Васильковський Вадим Володимирович","c":"Одеса","s":[90,97,94,75,92,92],"f":["","","","","",""],"g":"unstable","k":4,"t":6,"d":0},{"n":"Георгієв Сергій Борисович","c":"Одеса","s":[90,42,88,75,58,92],"f":["","","","","",""],"g":"unstable","k":1,"t":6,"d":34},{"n":"Сєров Віктор Степанович","c":"Одеса","s":[80,46,null,null,83,92],"f":["","","x","x","",""],"g":"unstable","k":1,"t":4,"d":9},{"n":"Гриценко Микола Ігорович","c":"Конотоп","s":[100,67,83,92,100,100],"f":["","","","","",""],"g":"stable","k":4,"t":6,"d":0},{"n":"Дрозд Сергій Володимирович","c":"Суми","s":[70,58,83,83,100,100],"f":["","","","","",""],"g":"unstable","k":2,"t":6,"d":0},{"n":"Мошенець Олександр Ігорович","c":"Суми","s":[70,83,83,92,100,100],"f":["","","","","",""],"g":"stable","k":3,"t":6,"d":0},{"n":"Олексенко Данило Романович","c":"Суми","s":[90,75,75,75,92,100],"f":["","","","","",""],"g":"unstable","k":2,"t":6,"d":8},{"n":"Шелест Григорій Геннадійович","c":"Суми","s":[70,69,83,92,92,100],"f":["","","","","",""],"g":"stable","k":3,"t":6,"d":8},{"n":"Кучерак Ігор Володимирович","c":"Івано-Франківськ","s":[20,58,42,58,33,50],"f":["","","","","",""],"g":"below","k":0,"t":6,"d":17},{"n":"Гнидка Андрій Ярославович","c":"Чернівці","s":[70,67,50,67,92,83],"f":["","","","","",""],"g":"lost","k":1,"t":6,"d":-9},{"n":"Мінаков Микола Миколайович","c":"Харків","s":[100,65,67,92,67,92],"f":["","","","","",""],"g":"unstable","k":3,"t":6,"d":25},{"n":"Слюсар Вадим Володимирович","c":"Харків","s":[90,100,92,83,83,92],"f":["","","","","",""],"g":"unstable","k":3,"t":6,"d":9},{"n":"Алексєєв Максим Олександрович","c":"Харків","s":[80,25,75,67,83,75],"f":["","","","","",""],"g":"below","k":0,"t":6,"d":-8},{"n":"Рева Олександр Анатолійович","c":"Хмельницький","s":[70,67,58,58,75,50],"f":["","","","","",""],"g":"below","k":0,"t":6,"d":-25},{"n":"Гапанюк Антон Вячеславович","c":"Хмельницький","s":[90,100,75,92,92,92],"f":["","","","","",""],"g":"stable","k":4,"t":6,"d":0},{"n":"Вініцький Сергій В'ячеславович","c":"Хмельницький","s":[70,83,42,67,100,83],"f":["","","","","",""],"g":"lost","k":1,"t":6,"d":-17},{"n":"Смірнов Володимир Анатолійович","c":"Хмельницький","s":[80,92,100,75,100,92],"f":["","","","","",""],"g":"unstable","k":4,"t":6,"d":-8}];
+const GN={stable:['Стабільні','Склали три останні тести поспіль'],unstable:['Склали зараз, але нестійко','Жовтень ≥92, раніше були результати нижче порогу'],lost:['Втратили результат','Склали минулого разу, у жовтні нижче 92'],below:['Нижче порогу','Не склали ні в липні, ні в жовтні'],new:['Новачки','Один результат (жовтень)'],nostart:['Тест не розпочато','Результату за жовтень немає']};
+const ORD=['stable','unstable','lost','below','new','nostart'];
+const el=(t,a={},h='')=>{const e=document.createElement(t);for(const k in a)e.setAttribute(k,a[k]);e.innerHTML=h;return e};
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const fmt=x=>x.toFixed(1).replace('.',',');
+// period stats
+const PS=P.map((_,i)=>{const v=M.map(m=>m.s[i]).filter(x=>x!=null);const ps=v.filter(x=>x>=92).length;return{n:v.length,ps,rate:ps/v.length*100,avg:mean(v)}});
+document.getElementById('pt').innerHTML='<tr><th>Показник</th>'+P.map(p=>`<th class="c">${p}</th>`).join('')+'</tr>'+
+ `<tr><td>Менеджерів з балом</td>${PS.map(s=>`<td class="c num">${s.n}</td>`).join('')}</tr>`+
+ `<tr><td>Склали (≥92)</td>${PS.map(s=>`<td class="c num">${s.ps}</td>`).join('')}</tr>`+
+ `<tr><td>Частка склавших</td>${PS.map(s=>`<td class="c num">${Math.round(s.rate)}%</td>`).join('')}</tr>`+
+ `<tr><td>Середній бал</td>${PS.map(s=>`<td class="c num">${fmt(s.avg)}</td>`).join('')}</tr>`;
+function line(id,vals,min,max,step,f){
+  const svg=document.getElementById(id),W=440,H=240,L=40,R=16,T=22,B=30;
+  const x=i=>L+i*(W-L-R)/5,y=v=>T+(max-v)/(max-min)*(H-T-B);
+  let s='';
+  for(let v=min;v<=max+1e-9;v+=step){s+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v}</text>`}
+  P.forEach((p,i)=>s+=`<text x="${x(i)}" y="${H-10}" text-anchor="middle">${p.slice(0,5)}${i==0||i==5?'.'+p.slice(6):''}</text>`);
+  s+=`<polyline fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" points="${vals.map((v,i)=>x(i)+','+y(v)).join(' ')}"/>`;
+  vals.forEach((v,i)=>s+=`<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"><title>${P[i]}: ${f(v)}</title></circle><text class="val" x="${x(i)}" y="${y(v)-10}" text-anchor="middle">${f(v)}</text>`);
+  svg.innerHTML=s;
+}
+line('c1',PS.map(s=>s.rate),0,80,20,v=>Math.round(v)+'%');
+line('c2',PS.map(s=>s.avg),70,95,5,v=>fmt(v));
+// groups
+const gb=document.getElementById('groups');
+ORD.forEach(g=>{const n=M.filter(m=>m.g==g).length;gb.append(el('div',{class:'g'},`<span class="n">${n}</span><b>${GN[g][0]}</b><span>${GN[g][1]}</span>`))});
+// table
+let cur='all',q='';
+const fl=document.getElementById('filters');
+[['all','Усі · '+M.length],...ORD.map(g=>[g,GN[g][0]+' · '+M.filter(m=>m.g==g).length])].forEach(([k,t])=>{const b=el('button',{class:'chip','aria-pressed':k=='all','data-k':k},t);b.onclick=()=>{cur=k;[...fl.children].forEach(c=>c.setAttribute('aria-pressed',c.dataset.k==k));render()};fl.append(b)});
+document.getElementById('q').oninput=e=>{q=e.target.value.trim().toLowerCase();render()};
+const cls=v=>v>=92?'p':v>=75?'m':'l';
+function cell(m,i){const v=m.s[i];if(v!=null)return`<span class="cell ${cls(v)}">${v}</span>`;
+  if(m.f[i]=='x')return'<span class="cell z" title="Зараховано без балів">зар.</span>';
+  if(m.f[i]=='n')return'<span class="cell z" title="Тест не розпочато">не почав</span>';
+  return'<span class="cell z">—</span>'}
+function render(){
+  let h='<tr><th>Менеджер</th><th>Місто</th>'+P.map(p=>`<th class="c">${p}</th>`).join('')+'<th class="c">≥92</th><th class="c">До попер.</th></tr>';
+  ORD.forEach(g=>{
+    if(cur!='all'&&cur!=g)return;
+    const rows=M.filter(m=>m.g==g&&(!q||(m.n+' '+m.c).toLowerCase().includes(q))).sort((a,b)=>(b.s[5]??-1)-(a.s[5]??-1)||a.n.localeCompare(b.n,'uk'));
+    if(!rows.length)return;
+    h+=`<tr class="grp"><td colspan="10">${GN[g][0]}<small>${rows.length} · ${GN[g][1]}</small></td></tr>`;
+    rows.forEach(m=>{const d=m.d;const dd=d==null?'—':d>0?`<span class="up">▲ +${d}</span>`:d<0?`<span class="down">▼ ${String(d).replace('-','−')}</span>`:'0';
+      h+=`<tr><td>${m.n}</td><td>${m.c}</td>${P.map((_,i)=>`<td class="c">${cell(m,i)}</td>`).join('')}<td class="c num">${m.k}/${m.t}</td><td class="c num">${dd}</td></tr>`});
+  });
+  document.getElementById('mt').innerHTML=h;
+}
+render();
+// cities
+const C={};M.forEach(m=>{(C[m.c]=C[m.c]||[]).push(m)});
+let ch='<tr><th>Місто</th><th class="c">Менеджерів</th><th class="c">Склали (≥92)</th><th class="c">Частка</th><th class="c">Середній бал</th></tr>';
+Object.entries(C).map(([c,a])=>{const v=a.map(m=>m.s[5]).filter(x=>x!=null);return{c,n:a.length,t:v.length,ps:v.filter(x=>x>=92).length,avg:v.length?mean(v):null}})
+ .sort((a,b)=>(a.ps/a.t)-(b.ps/b.t)||b.n-a.n).forEach(r=>{ch+=`<tr><td>${r.c}</td><td class="c num">${r.n}</td><td class="c num">${r.ps} з ${r.t}</td><td class="c num">${Math.round(r.ps/r.t*100)}%</td><td class="c num">${fmt(r.avg)}</td></tr>`});
+document.getElementById('ct').innerHTML=ch;
+</script>
+
+</body></html>
